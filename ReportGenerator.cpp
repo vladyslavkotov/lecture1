@@ -7,6 +7,23 @@
 #include <vector>
 #include <filesystem>
 
+class FileHandleWrapper
+{
+	HANDLE hFind;
+public:
+	FileHandleWrapper(HANDLE handle) : hFind(handle) {}
+	~FileHandleWrapper()
+	{
+		if (hFind != INVALID_HANDLE_VALUE)
+		{
+			FindClose(hFind);
+		}
+	}
+	HANDLE & GetHandle()
+	{
+		return hFind;
+	}
+};
 
 	std::wstring ReportGenerator:: byteSizeToStr(uintmax_t sizeInBytes)
 	{
@@ -57,7 +74,7 @@
 	{
 		auto results = std::vector<FileAttrs>();
 		WIN32_FIND_DATA data;
-		HANDLE hFind = FindFirstFile((directoryPath + L"\\*").c_str(), &data);
+		auto hFind = FileHandleWrapper(FindFirstFile((directoryPath + L"\\*").c_str(), &data));
 		do
 		{
 			if (wcscmp(data.cFileName, L".") != 0 && wcscmp(data.cFileName, L"..") != 0)
@@ -85,8 +102,7 @@
 						fileTimeToStr(data.ftLastWriteTime)));
 				}
 			}
-		} while (FindNextFile(hFind, &data) != 0);
-		FindClose(hFind);
+		} while (FindNextFile(hFind.GetHandle(), &data) != 0);
 		return results;
 	}
 

@@ -6,27 +6,34 @@
 #include <iomanip>
 #include <sstream>
 
-
-void CsvReportFactory:: WriteReport(const std::vector<FileAttrs>& entries)
+void CsvReportFactory::WriteReport(const std::vector<FileAttrs>& entries)
 {
 	std::wofstream csvFile;
 	csvFile.open("report.csv");
 	csvFile << L"Name,Size,Type,Created,Last Accessed,Last Modified\n";
 	for (const FileAttrs& entry : entries)
 	{
-		csvFile << entry.Name + L"," + entry.Size + L"," + entry.Type + L"," + entry.Created + L"," + entry.Accessed + L"," + entry.Modified + L"\n";
+		csvFile << entry.Name << L"," << entry.Size << L"," << entry.Type << L"," << entry.Created << L"," << entry.Accessed << L"," << entry.Modified << L"\n";
 	}
 	csvFile.close();
 }
 
 void TxtReportFactory::WriteReport(const std::vector<FileAttrs>& entries)
 {
-	std::wofstream txtFile;
-	txtFile.open("report.txt", std::ios::out | std::ios::app);
-	txtFile << L"Name Size  Type  Created  Last Accessed  Last Modified\n\n";
+	size_t maxNameLength = 0;
+	size_t maxSizeLength = 0;
+
 	for (const FileAttrs& entry : entries)
 	{
-		txtFile << entry.Name << L"  " << entry .Size << L"  " << entry.Type << L"  " << entry.Created + L"  " << entry.Accessed  << L"  "  << entry.Modified  << L"\n";
+		maxNameLength = entry.Name.length() > maxNameLength ? entry.Name.length() : maxNameLength;
+		maxSizeLength = entry.Size.length() > maxSizeLength ? entry.Size.length() : maxSizeLength;
+	}
+	std::wofstream txtFile;
+	txtFile.open("report.txt", std::ios::out | std::ios::app);
+	txtFile << L"Name" << std::setw(maxNameLength + maxSizeLength - 1) << "Size" << L"   " << "Type" << L" " << std::setw(22) << "Created" << std::setw(22) << "Accessed" << std::setw(22) << "Modified" << L"\n\n";
+	for (const FileAttrs& entry : entries)
+	{
+		txtFile << entry.Name << std::setw(maxNameLength + maxSizeLength + 3 - entry.Name.length()) << entry.Size << L"   " << entry.Type << std::setw(8 - entry.Type.length()) << L"   " << entry.Created << L"   " << entry.Accessed << L"   " << entry.Modified << L"\n";
 	}
 	txtFile.close();
 }
@@ -53,8 +60,7 @@ void JsonReportFactory::WriteReport(const std::vector<FileAttrs>& entries)
 			jsonFile << L",";
 		}
 	}
-	
+
 	jsonFile << L" \n ]\n}\n";
 	jsonFile.close();
 }
-

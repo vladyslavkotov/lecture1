@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+
 class ReportGenerator
 {
 	static std::wstring byteSizeToStr(uintmax_t sizeInBytes);
